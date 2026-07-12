@@ -2,16 +2,19 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
+import { SITE, BASE } from './site.config.ts';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://skiathos-atletico.gr',
+  site: SITE,
+  base: BASE,
   integrations: [
     sitemap({
+      // @ts-ignore — EnumChangefreq type narrowing quirk in @astrojs/sitemap@3.x
       serialize(item) {
         const url = item.url;
         // Homepage — highest priority
-        if (url === 'https://skiathos-atletico.gr/' || url === 'https://skiathos-atletico.gr') {
+        if (url === `${SITE}/` || url === `${SITE}`) {
           item.priority = 1.0;
           item.changefreq = 'weekly';
           item.lastmod = new Date().toISOString().split('T')[0];
