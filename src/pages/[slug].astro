@@ -1,4 +1,5 @@
 ---
+import { resolveBasePath } from "../utils/paths";
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BusinessHero from '../components/BusinessHero.astro';
@@ -80,7 +81,7 @@ const quickActionCount = [hasPhone, !!directionsUrl, hasWebsite].filter(Boolean)
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 pb-24 lg:pb-10">
     <!-- Back Button (bigger touch target) -->
     <a 
-      href="/" 
+      href={resolveBasePath("/")} 
       class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#171795] transition-colors duration-200 mb-5 sm:mb-6 group py-2 -ml-2 px-2 rounded-lg hover:bg-slate-50"
     >
       <svg class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +173,7 @@ const quickActionCount = [hasPhone, !!directionsUrl, hasWebsite].filter(Boolean)
             This business proudly sponsors our football team. Your support helps them continue their partnership!
           </p>
           <a 
-            href="/" 
+            href={resolveBasePath("/")} 
             class="inline-flex items-center justify-center w-full gap-2 bg-white text-[#171795] px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors"
           >
             Visit our Directory

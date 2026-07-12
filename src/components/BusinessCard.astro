@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { resolveAsset, resolveBasePath } from '../utils/paths';
 
 interface Props {
   business: CollectionEntry<'businesses'>;
@@ -22,8 +23,8 @@ function fallbackLogo(name: string): string {
   return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='100%25' height='100%25' fill='%23171795'/%3E%3Ctext x='50%25' y='50%25' fill='white' font-size='24' text-anchor='middle' dy='.3em' font-family='sans-serif' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
 }
 
-const featuredSrc = data.featuredImage || fallbackFeatured(data.name);
-const logoSrc = data.logo || fallbackLogo(data.name);
+const featuredSrc = data.featuredImage ? resolveAsset(data.featuredImage) : fallbackFeatured(data.name);
+const logoSrc = data.logo ? resolveAsset(data.logo) : fallbackLogo(data.name);
 ---
 
 <article 
@@ -32,7 +33,7 @@ const logoSrc = data.logo || fallbackLogo(data.name);
   data-category={data.category} 
   data-name={data.name.toLowerCase()}
 >
-  <a href={`/${data.slug}`} class="block outline-none focus-visible:ring-2 focus-visible:ring-[#171795] focus-visible:ring-offset-2 rounded-2xl">
+  <a href={resolveBasePath(`/${data.slug}`)} class="block outline-none focus-visible:ring-2 focus-visible:ring-[#171795] focus-visible:ring-offset-2 rounded-2xl">
     <!-- Image + Logo Wrapper -->
     <div class="relative">
       <!-- Image Section -->
