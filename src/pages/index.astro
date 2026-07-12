@@ -1,17 +1,275 @@
 ---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BusinessCard from '../components/BusinessCard.astro';
+import Sidebar from '../components/Sidebar.astro';
+import SEOOrganization from '../components/SEOOrganization.astro';
 
+const businesses = await getCollection('businesses');
+
+const homepageDescription = "Discover local Skiathos businesses that sponsor the Skiathos Atletico football team. Browse restaurants, hotels, bars, shops, and services from our valued partners.";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout 
+  title="Business Directory - Skiathos Atletico"
+  description={homepageDescription}
+  canonicalUrl="/"
+  ogType="website"
+>
+  <SEOOrganization />
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-14">
+    <!-- Premium Header (compact on mobile) -->
+    <div class="mb-6 sm:mb-10 lg:mb-14">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#171795]/5 border border-[#171795]/10 mb-3 sm:mb-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#171795]"></span>
+        <span class="text-xs font-semibold text-[#171795] uppercase tracking-wider">Our Partners</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-3 sm:mb-4">
+        Our Sponsors
+      </h1>
+      <p class="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
+        Discover the incredible businesses that support Skiathos Atletico. These local partners are the backbone of our team, providing the resources that help our athletes excel.
+      </p>
+    </div>
+
+    <!-- Mobile Search Bar (always visible) -->
+    <div class="lg:hidden mb-4">
+      <div class="relative">
+        <input
+          type="text"
+          id="search-mobile"
+          placeholder="Find a business..."
+          class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#171795]/20 focus:border-[#171795] outline-none transition-all shadow-sm"
+        />
+        <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-6 lg:gap-10">
+      <!-- Mobile Drawer Overlay -->
+      <div id="mobile-drawer-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+      
+      <!-- Mobile Drawer (separate from desktop sidebar) -->
+      <div id="mobile-drawer" class="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl z-50 flex flex-col lg:hidden -translate-x-full transition-transform duration-300 ease-out">
+        <!-- Drawer Header -->
+        <div class="flex items-center justify-between p-4 border-b border-slate-100 shrink-0">
+          <span class="text-lg font-bold text-slate-900">Filters</span>
+          <button id="mobile-filter-close" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors" aria-label="Close filters">
+            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Drawer Content (scrollable) -->
+        <div class="flex-1 overflow-y-auto">
+          <Sidebar />
+        </div>
+        <!-- Drawer Footer -->
+        <div class="p-4 border-t border-slate-100 shrink-0">
+          <button id="mobile-apply-filters" class="w-full py-3 bg-[#171795] text-white text-sm font-bold rounded-xl hover:bg-[#0f0f5a] transition-colors">
+            <span id="mobile-results-text">Show results</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Desktop Sidebar -->
+      <div class="hidden lg:block lg:sticky lg:top-24 lg:self-start lg:w-72 lg:shrink-0">
+        <Sidebar />
+      </div>
+
+      <!-- Business Grid -->
+      <div id="business-grid" class="flex-1 min-w-0">
+        <!-- Results count + Mobile filter toggle -->
+        <div class="flex items-center justify-between mb-5 gap-3">
+          <div id="results-count" class="text-sm font-medium text-slate-500 shrink-0">
+            Showing all {businesses.length} businesses
+          </div>
+          <div class="h-px flex-1 bg-slate-100 hidden sm:block"></div>
+          <!-- Mobile filter toggle with active count badge -->
+          <button
+            id="mobile-filter-toggle"
+            class="lg:hidden inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition-all shrink-0 relative"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+            </svg>
+            Filters
+            <span id="filter-count-badge" class="hidden absolute -top-2 -right-2 w-5 h-5 bg-[#171795] text-white text-[10px] font-bold rounded-full items-center justify-center">0</span>
+          </button>
+        </div>
+        
+        <div id="business-list" class={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 ${businesses.length === 0 ? 'hidden' : ''}`}>
+          {businesses.map((business) => (
+            <BusinessCard business={business} />
+          ))}
+        </div>
+        
+        {businesses.length === 0 && (
+          <div class="text-center py-20">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-slate-100">
+              <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+            </div>
+            <p class="text-slate-500 text-lg mb-2">No businesses yet</p>
+            <p class="text-slate-400 text-sm">Check back soon as we add our sponsor directory</p>
+          </div>
+        )}
+        
+        <div id="no-results" class="hidden text-center py-20">
+          <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-slate-100">
+            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <p class="text-slate-500 text-lg mb-2">No businesses found</p>
+          <p class="text-slate-400 text-sm mb-4">Try adjusting your search or filters</p>
+          <button id="clear-search" class="px-5 py-2 bg-[#171795] text-white text-sm font-semibold rounded-lg hover:bg-[#0f0f5a] transition-colors">
+            Clear filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Client-side filtering
+  const searchInput = document.getElementById('search') as HTMLInputElement;
+  const searchInputMobile = document.getElementById('search-mobile') as HTMLInputElement;
+  const categoryCheckboxes = document.querySelectorAll('.category-checkbox') as NodeListOf<HTMLInputElement>;
+  const clearFiltersBtn = document.getElementById('clear-filters') as HTMLButtonElement;
+  const businessCards = document.querySelectorAll('[data-business-card]') as NodeListOf<HTMLElement>;
+  const resultsCount = document.getElementById('results-count') as HTMLDivElement;
+  const noResults = document.getElementById('no-results') as HTMLDivElement;
+  const businessList = document.getElementById('business-list') as HTMLDivElement;
+  const clearSearchBtn = document.getElementById('clear-search') as HTMLButtonElement;
+  const mobileFilterToggle = document.getElementById('mobile-filter-toggle') as HTMLButtonElement;
+  const mobileFilterClose = document.getElementById('mobile-filter-close') as HTMLButtonElement;
+  const mobileApplyFilters = document.getElementById('mobile-apply-filters') as HTMLButtonElement;
+  const mobileDrawer = document.getElementById('mobile-drawer') as HTMLDivElement;
+  const mobileDrawerOverlay = document.getElementById('mobile-drawer-overlay') as HTMLDivElement;
+  const filterCountBadge = document.getElementById('filter-count-badge') as HTMLSpanElement;
+  const mobileResultsText = document.getElementById('mobile-results-text') as HTMLSpanElement;
+
+  let currentVisibleCount = businessCards.length;
+
+  function getActiveFilterCount(): number {
+    const selectedCategories = Array.from(categoryCheckboxes).filter(cb => cb.checked).length;
+    const hasSearch = (searchInput?.value.trim() || searchInputMobile?.value.trim()) ? 1 : 0;
+    return selectedCategories + hasSearch;
+  }
+
+  function updateFilterBadge() {
+    const count = getActiveFilterCount();
+    if (count > 0) {
+      filterCountBadge.textContent = String(count);
+      filterCountBadge.classList.remove('hidden');
+    } else {
+      filterCountBadge.classList.add('hidden');
+    }
+  }
+
+  function filterBusinesses() {
+    const searchTerm = (searchInput?.value || searchInputMobile?.value || '').toLowerCase().trim();
+    // Sync both search inputs
+    if (searchInput) searchInput.value = searchTerm;
+    if (searchInputMobile) searchInputMobile.value = searchTerm;
+
+    const selectedCategories = Array.from(categoryCheckboxes)
+      .filter(cb => cb.checked)
+      .map(cb => cb.dataset.category);
+
+    let visibleCount = 0;
+
+    businessCards.forEach((card) => {
+      const name = card.dataset.name || '';
+      const category = card.dataset.category || '';
+      
+      const matchesSearch = !searchTerm || name.includes(searchTerm);
+      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(category);
+
+      if (matchesSearch && matchesCategory) {
+        card.classList.remove('hidden');
+        visibleCount++;
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+
+    currentVisibleCount = visibleCount;
+
+    if (visibleCount === 0) {
+      businessList.classList.add('hidden');
+      noResults.classList.remove('hidden');
+    } else {
+      businessList.classList.remove('hidden');
+      noResults.classList.add('hidden');
+    }
+
+    resultsCount.textContent = `Showing ${visibleCount} business${visibleCount !== 1 ? 'es' : ''}`;
+
+    // Update the mobile "Show results" button text with count
+    if (mobileResultsText) {
+      mobileResultsText.textContent = `Show ${visibleCount} result${visibleCount !== 1 ? 's' : ''}`;
+    }
+
+    if (searchTerm || selectedCategories.length > 0) {
+      clearFiltersBtn?.classList.remove('hidden');
+    } else {
+      clearFiltersBtn?.classList.add('hidden');
+    }
+
+    updateFilterBadge();
+  }
+
+  // Mobile drawer — slide in from left
+  function openMobileDrawer() {
+    mobileDrawerOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    // Trigger slide-in on next frame
+    requestAnimationFrame(() => {
+      mobileDrawer.classList.remove('-translate-x-full');
+    });
+  }
+
+  function closeMobileDrawer() {
+    mobileDrawer.classList.add('-translate-x-full');
+    mobileDrawerOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // Event listeners
+  searchInput?.addEventListener('input', filterBusinesses);
+  searchInputMobile?.addEventListener('input', filterBusinesses);
+  
+  categoryCheckboxes.forEach(cb => {
+    cb.addEventListener('change', filterBusinesses);
+  });
+
+  clearFiltersBtn?.addEventListener('click', () => {
+    if (searchInput) searchInput.value = '';
+    if (searchInputMobile) searchInputMobile.value = '';
+    categoryCheckboxes.forEach(cb => cb.checked = false);
+    filterBusinesses();
+  });
+
+  clearSearchBtn?.addEventListener('click', () => {
+    if (searchInput) searchInput.value = '';
+    if (searchInputMobile) searchInputMobile.value = '';
+    categoryCheckboxes.forEach(cb => cb.checked = false);
+    filterBusinesses();
+  });
+
+  mobileFilterToggle?.addEventListener('click', openMobileDrawer);
+  mobileFilterClose?.addEventListener('click', closeMobileDrawer);
+  mobileApplyFilters?.addEventListener('click', closeMobileDrawer);
+  mobileDrawerOverlay?.addEventListener('click', closeMobileDrawer);
+
+  // Initialize the mobile results text
+  if (mobileResultsText) {
+    mobileResultsText.textContent = `Show ${currentVisibleCount} results`;
+  }
+</script>

@@ -1,0 +1,86 @@
+---
+interface Props {
+  lat?: number;
+  lng?: number;
+  zoom?: number;
+  class?: string;
+}
+
+const { 
+  lat = 39.1622, 
+  lng = 23.4900, 
+  zoom = 15,
+  class: className = ""
+} = Astro.props;
+
+const mapId = `map-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div 
+  id={mapId} 
+  class={`w-full h-80 rounded-2xl border border-slate-100 shadow-sm bg-slate-50 ${className}`}
+  data-lat={lat}
+  data-lng={lng}
+  data-zoom={zoom}
+>
+  <div class="w-full h-full flex items-center justify-center text-slate-400 text-sm">
+    Loading map...
+  </div>
+</div>
+
+<script>
+  let leafletLoaded = false;
+
+  function loadLeafletCSS() {
+    if (document.querySelector('link[href*="leaflet"]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+    link.crossOrigin = '';
+    document.head.appendChild(link);
+  }
+
+  async function initMap(el: HTMLElement) {
+    const lat = parseFloat(el.dataset.lat || '39.1622');
+    const lng = parseFloat(el.dataset.lng || '23.4900');
+    const zoom = parseInt(el.dataset.zoom || '15');
+
+    const L = await import('leaflet');
+
+    el.innerHTML = '';
+
+    const map = L.map(el, {
+      scrollWheelZoom: false,
+      attributionControl: false
+    }).setView([lat, lng], zoom);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    const customIcon = L.divIcon({
+      className: 'custom-map-marker',
+      html: `<div class="w-8 h-8 rounded-full bg-[#171795] border-2 border-white shadow-lg flex items-center justify-center"><div class="w-2 h-2 bg-white rounded-full"></div></div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+
+    L.marker([lat, lng], { icon: customIcon }).addTo(map);
+    L.control.attribution({ position: 'bottomright' }).addTo(map);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        const el = entry.target as HTMLElement;
+        observer.unobserve(el);
+        loadLeafletCSS();
+        initMap(el);
+      }
+    }
+  }, { rootMargin: '200px' });
+
+  const mapEls = document.querySelectorAll('[id^="map-"]');
+  mapEls.forEach((el) => observer.observe(el));
+</script>

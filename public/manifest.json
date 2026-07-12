@@ -1,0 +1,21 @@
+{
+  "name": "Skiathos Atletico Business Directory",
+  "short_name": "Skiathos Atletico",
+  "description": "Discover local Skiathos businesses that sponsor the Skiathos Atletico football team",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#171795",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

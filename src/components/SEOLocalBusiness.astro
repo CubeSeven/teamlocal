@@ -1,0 +1,143 @@
+---
+interface Review {
+  reviewer: string;
+  date: string;
+  rating: number;
+  text: string;
+}
+
+interface Props {
+  name: string;
+  description: string;
+  image: string;
+  logo?: string;
+  category: string;
+  slug: string;
+  contact?: {
+    phone?: string;
+    email?: string;
+    address?: string;
+  };
+  social?: {
+    website?: string;
+    facebook?: string;
+    instagram?: string;
+    tripadvisor?: string;
+    google?: string;
+  };
+  googleRating: number;
+  googleReviewCount?: number;
+  reviews?: Review[];
+  latitude?: number;
+  longitude?: number;
+  openingHours?: string;
+  priceRange?: string;
+  servesCuisine?: string;
+}
+
+const {
+  name, description, image, logo, category, slug,
+  contact = {}, social = {},
+  googleRating, googleReviewCount, reviews = [],
+  latitude, longitude,
+  openingHours, priceRange, servesCuisine,
+} = Astro.props;
+
+const siteUrl = "https://skiathos-atletico.gr";
+const directoryUrl = `${siteUrl}/${slug}/`;
+const businessRealUrl = social.website || directoryUrl;
+
+function categoryToSchemaType(cat: string): string {
+  const c = cat.toLowerCase();
+  if (c.includes('restaurant') || c.includes('taverna')) return 'Restaurant';
+  if (c.includes('hotel') || c.includes('villa')) return 'LodgingBusiness';
+  if (c.includes('bar') || c.includes('lounge') || c.includes('pub')) return 'BarOrPub';
+  if (c.includes('café') || c.includes('cafe') || c.includes('coffee') || c.includes('kafenion')) return 'CafeOrCoffeeShop';
+  if (c.includes('shop') || c.includes('retail') || c.includes('store') || c.includes('souvenir')) return 'Store';
+  return 'LocalBusiness';
+}
+
+const sameAs: string[] = [];
+if (social.facebook) sameAs.push(social.facebook);
+if (social.instagram) sameAs.push(social.instagram);
+if (social.tripadvisor) sameAs.push(social.tripadvisor);
+if (social.google) sameAs.push(social.google);
+if (social.website) {
+  // Add our directory page as a sameAs reference (not website, which is url)
+  sameAs.push(directoryUrl);
+}
+
+const hasAggregateRating = googleReviewCount !== undefined && googleReviewCount > 0;
+const hasReviews = reviews.length > 0;
+
+const ld: Record<string, unknown> = {
+  "@context": "https://schema.org",
+  "@type": categoryToSchemaType(category),
+  "name": name,
+  "description": description,
+  "url": businessRealUrl,
+  "image": image.startsWith('http') ? image : `${siteUrl}${image}`,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": directoryUrl,
+  },
+};
+
+if (contact.address) {
+  ld.address = {
+    "@type": "PostalAddress",
+    "streetAddress": contact.address,
+    "addressLocality": "Skiathos",
+    "addressRegion": "Sporades",
+    "addressCountry": "GR",
+  };
+}
+if (contact.phone) ld.telephone = contact.phone;
+// Email intentionally omitted from JSON-LD to prevent spam harvesting
+
+if (latitude !== undefined && longitude !== undefined) {
+  ld.geo = {
+    "@type": "GeoCoordinates",
+    "latitude": latitude,
+    "longitude": longitude,
+  };
+}
+
+if (openingHours) ld.openingHours = openingHours;
+if (priceRange) ld.priceRange = priceRange;
+if (servesCuisine) ld.servesCuisine = servesCuisine;
+
+if (sameAs.length > 0) ld.sameAs = sameAs;
+
+if (hasAggregateRating) {
+  ld.aggregateRating = {
+    "@type": "AggregateRating",
+    "ratingValue": googleRating,
+    "reviewCount": googleReviewCount,
+    "bestRating": 5,
+    "itemReviewed": {
+      "@type": categoryToSchemaType(category),
+      "name": name,
+    },
+  };
+}
+
+if (hasReviews) {
+  ld.review = reviews.map((r) => ({
+    "@type": "Review",
+    "author": {
+      "@type": "Person",
+      "name": r.reviewer,
+    },
+    "datePublished": r.date,
+    "reviewRating": {
+      "@type": "Rating",
+      "ratingValue": r.rating,
+      "bestRating": 5,
+    },
+    "reviewBody": r.text,
+  }));
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(ld)}></script>

@@ -1,0 +1,66 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  business: CollectionEntry<'businesses'>;
+}
+
+const { business } = Astro.props;
+const { data } = business;
+
+function getInitials(name: string): string {
+  return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function fallbackFeatured(name: string): string {
+  const initials = getInitials(name);
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='514'%3E%3Crect width='100%25' height='100%25' fill='%23171795'/%3E%3Ctext x='50%25' y='50%25' fill='white' font-size='72' text-anchor='middle' dy='.3em' font-family='sans-serif' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
+}
+
+function fallbackLogo(name: string): string {
+  const initials = getInitials(name);
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='100%25' height='100%25' fill='%23171795'/%3E%3Ctext x='50%25' y='50%25' fill='white' font-size='36' text-anchor='middle' dy='.3em' font-family='sans-serif' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
+}
+
+const featuredSrc = data.featuredImage || fallbackFeatured(data.name);
+const logoSrc = data.logo || fallbackLogo(data.name);
+---
+
+<div class="relative">
+  <!-- Image area (overflow-hidden only here, so logo isn't clipped) -->
+  <div class="relative aspect-[16/9] sm:aspect-[21/9] lg:aspect-[3/1] rounded-3xl overflow-hidden bg-slate-100 shadow-2xl shadow-slate-900/10">
+    <img
+      src={featuredSrc}
+      alt={data.name}
+      width="1200"
+      height="514"
+      class="w-full h-full object-cover"
+    />
+    <!-- Category chip at top-right -->
+    <div class="absolute top-4 right-4 sm:top-5 sm:right-5 z-10">
+      <span class="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-white/95 text-[#171795] shadow-sm backdrop-blur-sm border border-white/50">
+        {data.category}
+      </span>
+    </div>
+  </div>
+
+  <!-- Logo + Business name (pulled up into the image, not clipped) -->
+  <div class="relative px-4 sm:px-8 -mt-20 sm:-mt-24">
+    <div class="flex items-end gap-4 sm:gap-6">
+      <!-- Logo frame -->
+      <div class="w-40 h-40 sm:w-48 sm:h-48 rounded-2xl bg-white shadow-xl shadow-black/10 flex items-center justify-center border border-slate-100 overflow-hidden shrink-0">
+        <img
+          src={logoSrc}
+          alt={`${data.name} logo`}
+          width="192"
+          height="192"
+          class="w-full h-full object-cover"
+        />
+      </div>
+      <!-- Business name -->
+      <div class="pb-2 sm:pb-3">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">{data.name}</h1>
+      </div>
+    </div>
+  </div>
+</div>

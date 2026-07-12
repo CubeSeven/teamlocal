@@ -1,0 +1,38 @@
+---
+const siteUrl = "https://skiathos-atletico.gr";
+
+const ld = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SportsTeam",
+      "name": "Skiathos Atletico",
+      "url": siteUrl,
+      "logo": `${siteUrl}/favicon.svg`,
+      "description": "Skiathos Atletico is a football club based in Skiathos, Greece. Our business directory connects sponsors and supporters with the local businesses that power our team.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Skiathos",
+        "addressRegion": "Sporades",
+        "addressCountry": "GR",
+      },
+    },
+    {
+      "@type": "WebSite",
+      "name": "Skiathos Atletico Business Directory",
+      "url": siteUrl,
+      "description": "Discover local Skiathos businesses that sponsor the Skiathos Atletico football team.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": `${siteUrl}/?search={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(ld)}></script>

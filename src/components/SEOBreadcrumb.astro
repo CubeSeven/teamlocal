@@ -1,0 +1,58 @@
+---
+interface Props {
+  name: string;
+  category?: string;
+  subCategory?: string;
+  slug: string;
+}
+
+const { name, category, subCategory, slug } = Astro.props;
+
+const siteUrl = "https://skiathos-atletico.gr";
+
+const itemListElement: Record<string, unknown>[] = [
+  {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": `${siteUrl}/`,
+  },
+];
+
+let position = 2;
+
+if (category) {
+  const catSlug = category.toLowerCase().replace(/\s+/g, '-');
+  itemListElement.push({
+    "@type": "ListItem",
+    "position": position++,
+    "name": category,
+    "item": `${siteUrl}/category/${catSlug}/`,
+  });
+}
+
+if (subCategory) {
+  const subSlug = subCategory.toLowerCase().replace(/\s+/g, '-');
+  itemListElement.push({
+    "@type": "ListItem",
+    "position": position++,
+    "name": subCategory,
+    "item": `${siteUrl}/category/${subSlug}/`,
+  });
+}
+
+itemListElement.push({
+  "@type": "ListItem",
+  "position": position,
+  "name": name,
+  "item": `${siteUrl}/${slug}/`,
+});
+
+const ld = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": itemListElement,
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(ld)}></script>

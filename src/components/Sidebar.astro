@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+
+const businesses = await getCollection('businesses');
+const categories = [...new Set(businesses.map(b => b.data.category))].sort();
+---
+
+<aside id="sidebar" class="w-full space-y-4 p-4 lg:p-0">
+  <!-- Search Section (desktop only, mobile search is outside) -->
+  <div class="hidden lg:block bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+    <label for="search" class="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5">
+      Search
+    </label>
+    <div class="relative">
+      <input
+        type="text"
+        id="search"
+        placeholder="Find a business..."
+        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#171795]/20 focus:border-[#171795] outline-none transition-all"
+      />
+      <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Categories Section -->
+  <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+    <label class="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">
+      Categories
+    </label>
+    <div class="flex flex-wrap gap-2">
+      {categories.map(category => (
+        <label class="inline-flex items-center cursor-pointer group select-none">
+          <input
+            type="checkbox"
+            value={category}
+            class="category-checkbox peer sr-only"
+            data-category={category}
+          />
+          <span class="px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 text-slate-600 bg-white transition-all duration-200 peer-checked:bg-[#171795] peer-checked:text-white peer-checked:border-[#171795] peer-checked:shadow-sm peer-checked:shadow-[#171795]/20 group-hover:border-slate-300">
+            {category}
+          </span>
+        </label>
+      ))}
+    </div>
+  </div>
+
+  <!-- Clear Filters Button -->
+  <button
+    id="clear-filters"
+    class="w-full py-2.5 text-sm font-semibold text-[#171795] bg-white border border-[#171795]/15 rounded-xl hover:bg-[#171795]/5 hover:border-[#171795]/25 transition-all duration-200 hidden"
+  >
+    Clear all filters
+  </button>
+</aside>

@@ -1,0 +1,112 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  business: CollectionEntry<'businesses'>;
+}
+
+const { business } = Astro.props;
+const { data } = business;
+
+function getInitials(name: string): string {
+  return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function fallbackFeatured(name: string): string {
+  const initials = getInitials(name);
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23171795'/%3E%3Ctext x='50%25' y='50%25' fill='white' font-size='48' text-anchor='middle' dy='.3em' font-family='sans-serif' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
+}
+
+function fallbackLogo(name: string): string {
+  const initials = getInitials(name);
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='100%25' height='100%25' fill='%23171795'/%3E%3Ctext x='50%25' y='50%25' fill='white' font-size='24' text-anchor='middle' dy='.3em' font-family='sans-serif' font-weight='bold'%3E${initials}%3C/text%3E%3C/svg%3E`;
+}
+
+const featuredSrc = data.featuredImage || fallbackFeatured(data.name);
+const logoSrc = data.logo || fallbackLogo(data.name);
+---
+
+<article 
+  class="group relative bg-white rounded-2xl border border-slate-100/80 overflow-hidden transition-all duration-300 ease-out hover:shadow-[0_12px_40px_-12px_rgba(23,23,149,0.18)] hover:-translate-y-1 hover:border-slate-200"
+  data-business-card 
+  data-category={data.category} 
+  data-name={data.name.toLowerCase()}
+>
+  <a href={`/${data.slug}`} class="block outline-none focus-visible:ring-2 focus-visible:ring-[#171795] focus-visible:ring-offset-2 rounded-2xl">
+    <!-- Image + Logo Wrapper -->
+    <div class="relative">
+      <!-- Image Section -->
+      <div class="relative aspect-[4/3] overflow-hidden bg-slate-100 rounded-t-2xl">
+        <img 
+          src={featuredSrc} 
+          alt={data.name}
+          width="400"
+          height="300"
+          loading="lazy"
+          class="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:scale-105"
+        />
+        <!-- Refined gradient overlay -->
+        <div class="absolute inset-0 bg-gradient-to-r from-black/50 via-black/25 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
+        
+        <!-- Category Chip -->
+        <div class="absolute top-3 right-3 z-10">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide uppercase bg-white/95 text-[#171795] shadow-sm backdrop-blur-sm border border-white/50">
+            {data.category}
+          </span>
+        </div>
+      </div>
+      
+      <!-- Logo overlay at bottom left -->
+      <div class="absolute -bottom-8 left-5 z-20">
+        <div class="w-16 h-16 rounded-2xl bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)] flex items-center justify-center border border-slate-100 overflow-hidden transition-transform duration-300 group-hover:scale-110">
+          <img 
+            src={logoSrc} 
+            alt={`${data.name} logo`}
+            width="64"
+            height="64"
+            class="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Card Body -->
+    <div class="pt-10 pb-5 px-5">
+      <div class="flex items-start justify-between gap-3 mb-2">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 leading-tight tracking-tight group-hover:text-[#171795] transition-colors duration-200">
+            {data.name}
+          </h3>
+          <p class="text-sm text-slate-500 font-medium mt-0.5 line-clamp-2 leading-relaxed">
+            {data.description}
+          </p>
+        </div>
+      </div>
+      
+      <!-- Rating and Button Row -->
+      <div class="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+        <div class="flex items-center gap-1.5">
+          {data.googleRating > 0 && data.googleReviewCount != null && data.googleReviewCount > 0 ? (
+            <Fragment>
+              <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+              <span class="text-sm font-bold text-slate-900">{data.googleRating}</span>
+              <span class="text-xs text-slate-400 font-medium">({data.googleReviewCount})</span>
+            </Fragment>
+          ) : (
+            <span class="text-xs text-slate-400 font-medium">New listing</span>
+          )}
+        </div>
+        
+        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#171795] text-white shadow-sm shadow-[#171795]/20 transition-all duration-200 group-hover:bg-[#0f0f5a] group-hover:shadow-[#171795]/30 group-hover:translate-x-0.5">
+          View More
+          <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </a>
+</article>
