@@ -13,21 +13,24 @@ export function resolveAsset(path: string | undefined | null): string {
     return path;
   }
   if (path.startsWith("/")) {
-    const base = import.meta.env.BASE_URL; // always ends with "/"
-    // path starts with "/" → strip it to avoid "//" and append to base
+    let base = import.meta.env.BASE_URL;
+    if (!base.endsWith('/')) base += '/';
     return `${base}${path.slice(1)}`;
   }
   return path;
 }
 
 export function resolveBasePath(path: string): string {
-  if (!path) return import.meta.env.BASE_URL;
+  let base = import.meta.env.BASE_URL;
+  if (!base) return '/';
+  if (!base.endsWith('/')) base += '/';
+
+  if (!path) return base;
   if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("//")) {
     return path;
   }
-  const base = import.meta.env.BASE_URL; // always ends with "/"
+  
   if (path === "/") return base;
-  // path may already include a leading slash — normalise
   const trimmed = path.startsWith("/") ? path.slice(1) : path;
   return `${base}${trimmed}`;
 }
@@ -41,9 +44,14 @@ export function resolveUrl(path: string): string {
   if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("//")) {
     return path;
   }
-  const site = import.meta.env.SITE || "https://skiathos-atletico.gr";
-  const base = import.meta.env.BASE_URL;
-  if (path === "/") return `${site}${base === "/" ? "/" : base}`;
+  let site = import.meta.env.SITE || "https://skiathos-atletico.gr";
+  if (site.endsWith('/')) site = site.slice(0, -1);
+
+  let base = import.meta.env.BASE_URL;
+  if (!base) base = '/';
+  if (!base.endsWith('/')) base += '/';
+
+  if (path === "/") return `${site}${base}`;
   const trimmed = path.startsWith("/") ? path.slice(1) : path;
   return `${site}${base}${trimmed}`;
 }
